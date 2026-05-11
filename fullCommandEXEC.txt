@@ -1,0 +1,8 @@
+cd /home/bug/Desktop/DELTA-AI-main
+source .venv/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+pip install -e .
+python -m ml.benchmark --config [benchmark.yaml](http://_vscodecontentref_/1) --benchmark-name full_suite_80_20_prepare --prepare-only --force
+python -m ml.benchmark --config [benchmark.yaml](http://_vscodecontentref_/2) --benchmark-name full_suite_80_20 --force
+
+python -m ml.benchmark --config [benchmark.yaml](http://_vscodecontentref_/0) --benchmark-name full_suite_80_20 --force

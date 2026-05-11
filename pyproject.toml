@@ -1,0 +1,49 @@
+[project]
+name = "delta-ml"
+version = "0.1.0"
+description = "IOC severity research stack for teacher distillation and neural modeling."
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.3",
+    "pyarrow>=23.0",
+    "pyyaml>=6.0",
+    "scikit-learn>=1.8",
+    "xgboost>=3.2",
+    "rich>=14.3",
+    "joblib>=1.5",
+    "tqdm>=4.67",
+]
+
+[project.optional-dependencies]
+neural = [
+    "torch>=2.6",
+    "transformers>=5.2.0",
+    "sentence-transformers>=5.2",
+    "huggingface_hub>=1.5",
+    "faiss-cpu>=1.13",
+]
+research = [
+    "catboost>=1.2",
+    "captum>=0.7",
+    "shap>=0.46",
+]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.9",
+    "mypy>=1.15",
+]
+all = [
+    "torch>=2.6",
+    "transformers>=5.2.0",
+    "sentence-transformers>=5.2",
+    "huggingface_hub>=1.5",
+    "faiss-cpu>=1.13",
+    "catboost>=1.2",
+    "captum>=0.7",
+    "shap>=0.46",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"

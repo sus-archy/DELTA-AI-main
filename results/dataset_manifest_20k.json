@@ -1,0 +1,22 @@
+{
+  "source_row_count": 769831,
+  "requested_limit": 20000,
+  "rows": {
+    "train": 13998,
+    "validation": 3000,
+    "test": 3002
+  },
+  "notes": {
+    "sampling": "balanced by severity with source/type coverage, then grouped stratified split by indicator_key",
+    "classes": [
+      "medium",
+      "high",
+      "critical"
+    ]
+  },
+  "relative_paths": {
+    "train": "artifacts/datasets/train.parquet",
+    "validation": "artifacts/datasets/validation.parquet",
+    "test": "artifacts/datasets/test.parquet"
+  }
+}

@@ -1,0 +1,25 @@
+project_root: ..
+data:
+  db_csv: Data/DB-ThreatIndicators.csv
+  merged_ip_txt: null
+  merged_phishing_csv: null
+paths:
+  artifacts_dir: artifacts
+  models_dir: models
+  reports_dir: reports
+  cache_root: .cache
+splits:
+  mode: temporal
+  test_days: 90
+  validation_days: 60
+runtime:
+  seed: 42
+  default_batch_size: 16
+  default_max_length: 384
+models:
+  default_encoder: modernbert-base
+  candidate_encoders:
+    - modernbert-base
+    - securebert2-base
+    - cysecbert
+    - secbert-base

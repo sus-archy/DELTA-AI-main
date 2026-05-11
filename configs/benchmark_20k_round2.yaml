@@ -1,0 +1,80 @@
+project_root: ..
+data:
+  db_csv: Data/DB-ThreatIndicators.csv
+  merged_ip_txt: null
+  merged_phishing_csv: null
+paths:
+  artifacts_dir: artifacts
+  models_dir: models
+  reports_dir: reports
+  cache_root: .cache
+splits:
+  test_days: 90
+  validation_days: 60
+runtime:
+  seed: 42
+  default_batch_size: 16
+  default_max_length: 384
+models:
+  default_encoder: securebert2-base
+  candidate_encoders:
+    - securebert2-base
+benchmark:
+  target: db_severity
+  label_source: DB-ThreatIndicators.csv
+  rebuild_dataset: false
+  dataset_limit: 20000
+  resume: true
+  stop_on_error: false
+  seeds:
+    - 42
+  experiments:
+    - name: logreg_tfidf_valuechar_effective_tuned
+      enabled: true
+      runner: classical
+      model: logreg_tfidf
+      class_balance: effective
+      feature_variant: value_char
+      tune_c: true
+      c_grid:
+        - 0.5
+        - 1.0
+        - 2.0
+        - 4.0
+        - 8.0
+      group: shortlist_round2
+      ablation: sparse_value_char_tuned
+    - name: securebert2_lora_balanced_softmax_effective_temp
+      enabled: true
+      runner: finetune
+      encoder: securebert2-base
+      peft: lora
+      loss: balanced_softmax
+      class_balance: effective
+      epochs: 2
+      calibration: temperature
+      group: shortlist_round2
+      ablation: securebert_temp
+    - name: securebert2_lora_balanced_softmax_effective_epoch3_temp
+      enabled: true
+      runner: finetune
+      encoder: securebert2-base
+      peft: lora
+      loss: balanced_softmax
+      class_balance: effective
+      epochs: 3
+      calibration: temperature
+      group: shortlist_round2
+      ablation: securebert_epoch3
+    - name: securebert2_lora_balanced_softmax_effective_len192_temp
+      enabled: true
+      runner: finetune
+      encoder: securebert2-base
+      peft: lora
+      loss: balanced_softmax
+      class_balance: effective
+      epochs: 2
+      calibration: temperature
+      max_length: 192
+      group: shortlist_round2
+      ablation: securebert_len192

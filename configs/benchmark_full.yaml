@@ -1,0 +1,199 @@
+project_root: ..
+data:
+  db_csv: Data/DB-ThreatIndicators.csv
+  merged_ip_txt: null
+  merged_phishing_csv: null
+paths:
+  artifacts_dir: artifacts
+  models_dir: models
+  reports_dir: reports
+  cache_root: .cache
+splits:
+  mode: temporal
+  test_days: 90
+  validation_days: 60
+runtime:
+  seed: 42
+  default_batch_size: 16
+  default_max_length: 384
+models:
+  default_encoder: modernbert-base
+  candidate_encoders:
+    - modernbert-base
+    - securebert2-base
+    - cysecbert
+    - secbert-base
+benchmark:
+  target: db_severity
+  label_source: DB-ThreatIndicators.csv
+  rebuild_dataset: false
+  dataset_limit: 20000
+  resume: true
+  stop_on_error: false
+  seeds:
+    - 42
+  experiments:
+
+    - name: logreg_tfidf_valuechar_effective_tuned
+      enabled: true
+      runner: classical
+      model: logreg_tfidf
+      class_balance: effective
+      feature_variant: value_char
+      tune_c: true
+      c_grid: [0.5, 1.0, 2.0, 4.0, 8.0]
+      group: best_models
+      ablation: best_classical
+
+    - name: logreg_tfidf_valuechar_effective
+      enabled: true
+      runner: classical
+      model: logreg_tfidf
+      class_balance: effective
+      feature_variant: value_char
+      group: best_models
+      ablation: best_classical
+
+    - name: logreg_tfidf_effective
+      enabled: true
+      runner: classical
+      model: logreg_tfidf
+      class_balance: effective
+      group: baselines
+      ablation: class_balance
+
+    - name: logreg_tfidf_none
+      enabled: true
+      runner: classical
+      model: logreg_tfidf
+      class_balance: none
+      group: baselines
+      ablation: class_balance
+
+    - name: logreg_tfidf_balanced
+      enabled: true
+      runner: classical
+      model: logreg_tfidf
+      class_balance: balanced
+      group: baselines
+      ablation: class_balance
+
+    - name: xgboost_hybrid_modernbert_effective
+      enabled: true
+      runner: classical
+      model: xgboost_hybrid
+      encoder: modernbert-base
+      class_balance: effective
+      group: hybrid
+      ablation: encoder
+
+    - name: xgboost_hybrid_securebert2_effective
+      enabled: true
+      runner: classical
+      model: xgboost_hybrid
+      encoder: securebert2-base
+      class_balance: effective
+      group: hybrid
+      ablation: encoder
+
+    - name: modernbert_lora_balanced_softmax_effective
+      enabled: true
+      runner: finetune
+      encoder: modernbert-base
+      peft: lora
+      loss: balanced_softmax
+      class_balance: effective
+      epochs: 2
+      group: neural_modernbert
+      ablation: loss
+
+    - name: modernbert_lora_weighted_ce_effective
+      enabled: true
+      runner: finetune
+      encoder: modernbert-base
+      peft: lora
+      loss: weighted_ce
+      class_balance: effective
+      epochs: 2
+      group: neural_modernbert
+      ablation: loss
+
+    - name: modernbert_lora_ce_none
+      enabled: true
+      runner: finetune
+      encoder: modernbert-base
+      peft: lora
+      loss: ce
+      class_balance: none
+      epochs: 2
+      group: neural_modernbert
+      ablation: loss
+
+    - name: modernbert_lora_cb_focal_effective
+      enabled: true
+      runner: finetune
+      encoder: modernbert-base
+      peft: lora
+      loss: cb_focal
+      class_balance: effective
+      focal_gamma: 1.5
+      epochs: 2
+      group: neural_modernbert
+      ablation: loss
+
+    - name: securebert2_lora_balanced_softmax_effective
+      enabled: true
+      runner: finetune
+      encoder: securebert2-base
+      peft: lora
+      loss: balanced_softmax
+      class_balance: effective
+      epochs: 2
+      group: neural_securebert
+      ablation: encoder
+
+    - name: securebert2_lora_balanced_softmax_effective_epoch3
+      enabled: true
+      runner: finetune
+      encoder: securebert2-base
+      peft: lora
+      loss: balanced_softmax
+      class_balance: effective
+      epochs: 3
+      calibration: temperature
+      group: neural_securebert
+      ablation: encoder
+
+    - name: securebert2_lora_cb_focal_effective
+      enabled: true
+      runner: finetune
+      encoder: securebert2-base
+      peft: lora
+      loss: cb_focal
+      class_balance: effective
+      focal_gamma: 1.5
+      epochs: 2
+      group: neural_securebert
+      ablation: encoder
+
+    - name: cysecbert_lora_balanced_softmax_effective
+      enabled: true
+      runner: finetune
+      encoder: cysecbert
+      peft: lora
+      loss: balanced_softmax
+      class_balance: effective
+      epochs: 2
+      group: neural_cysec
+      ablation: encoder
+
+    - name: secbert_lora_balanced_softmax_effective
+      enabled: true
+      runner: finetune
+      encoder: secbert-base
+      peft: lora
+      loss: balanced_softmax
+      class_balance: effective
+      epochs: 2
+      group: neural_secbert
+      ablation: encoder
