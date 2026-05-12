@@ -9,6 +9,7 @@ __pycache__/
 
 artifacts/
 models/
+delta_ml.egg-info/
 
 Data/*
 !Data/README.md

@@ -9,6 +9,7 @@ from .settings import bootstrap_environment
 import pandas as pd
 import torch
 from datasets import Dataset
+from peft import LoraConfig, TaskType, get_peft_model
 from transformers import DataCollatorWithPadding, Trainer, TrainingArguments
 
 from .calibration import apply_temperature, fit_temperature, logits_to_proba, write_prediction_artifact
@@ -182,8 +183,6 @@ def fine_tune(
     tokenizer = load_tokenizer(encoder_name, paths.models_dir)
     model = load_sequence_classifier(encoder_name, paths.models_dir, num_labels=len(LABEL_NAMES))
     if peft_mode == "lora":
-        if get_peft_model is None:
-            raise RuntimeError("peft is not installed but --peft lora was requested.")
         target_modules = _infer_lora_target_modules(model)
         peft_config = LoraConfig(
             task_type=TaskType.SEQ_CLS,

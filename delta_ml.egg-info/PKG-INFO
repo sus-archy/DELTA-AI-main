@@ -1,0 +1,41 @@
+Metadata-Version: 2.4
+Name: delta-ml
+Version: 0.1.0
+Summary: IOC severity research stack for teacher distillation and neural modeling.
+Requires-Python: >=3.11
+Requires-Dist: numpy>=1.26
+Requires-Dist: pandas>=2.3
+Requires-Dist: pyarrow>=23.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: scikit-learn>=1.8
+Requires-Dist: xgboost>=3.2
+Requires-Dist: rich>=14.3
+Requires-Dist: joblib>=1.5
+Requires-Dist: tqdm>=4.67
+Provides-Extra: neural
+Requires-Dist: torch>=2.6; extra == "neural"
+Requires-Dist: transformers>=5.2.0; extra == "neural"
+Requires-Dist: datasets>=2.20; extra == "neural"
+Requires-Dist: sentence-transformers>=5.2; extra == "neural"
+Requires-Dist: huggingface_hub>=1.5; extra == "neural"
+Requires-Dist: faiss-cpu>=1.13; extra == "neural"
+Requires-Dist: peft>=0.13; extra == "neural"
+Provides-Extra: research
+Requires-Dist: catboost>=1.2; extra == "research"
+Requires-Dist: captum>=0.7; extra == "research"
+Requires-Dist: shap>=0.46; extra == "research"
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: ruff>=0.9; extra == "dev"
+Requires-Dist: mypy>=1.15; extra == "dev"
+Provides-Extra: all
+Requires-Dist: torch>=2.6; extra == "all"
+Requires-Dist: transformers>=5.2.0; extra == "all"
+Requires-Dist: datasets>=2.20; extra == "all"
+Requires-Dist: sentence-transformers>=5.2; extra == "all"
+Requires-Dist: huggingface_hub>=1.5; extra == "all"
+Requires-Dist: faiss-cpu>=1.13; extra == "all"
+Requires-Dist: catboost>=1.2; extra == "all"
+Requires-Dist: captum>=0.7; extra == "all"
+Requires-Dist: shap>=0.46; extra == "all"
+Requires-Dist: peft>=0.13; extra == "all"

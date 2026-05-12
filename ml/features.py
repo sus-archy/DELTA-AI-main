@@ -113,8 +113,10 @@ def augment_features(
 ) -> pd.DataFrame:
     enriched = frame.copy()
 
-    ip_sidecar = ip_sidecar or {"exact_ips": set(), "cidr_prefix_by_base": {}}
-    phishing_sidecar = phishing_sidecar or pd.DataFrame(columns=["domain_norm", "target"])
+    if ip_sidecar is None:
+        ip_sidecar = {"exact_ips": set(), "cidr_prefix_by_base": {}}
+    if phishing_sidecar is None:
+        phishing_sidecar = pd.DataFrame(columns=["domain_norm", "target"])
 
     now = enriched["lastSeen_dt"].max()
 

@@ -9,9 +9,9 @@ paths:
   reports_dir: reports
   cache_root: .cache
 splits:
-  mode: temporal
-  test_days: 90
-  validation_days: 60
+  mode: group_stratified
+  train_frac: 0.7
+  validation_frac: 0.2
 runtime:
   seed: 42
   default_batch_size: 16
@@ -27,7 +27,7 @@ benchmark:
   target: db_severity
   label_source: DB-ThreatIndicators.csv
   rebuild_dataset: false
-  dataset_limit: 20000
+  dataset_limit: null
   resume: true
   stop_on_error: false
   seeds:

@@ -107,15 +107,20 @@ def main() -> None:
     parser.add_argument(
         "--limit",
         type=int,
-        default=20000,
-        help="Dataset size limit (default: 20000). Use --no-limit for full dataset.",
+        default=None,
+        help="Dataset size limit. Omit to use full dataset.",
     )
     parser.add_argument(
         "--no-limit",
         action="store_true",
-        help="Use full dataset (no limit). Overrides --limit.",
+        help="Alias for --limit (full dataset, no limit).",
     )
+    
     args = parser.parse_args()
+
+    config_path = args.config
+    force = args.force
+    prepare_only = args.prepare_only
 
     if args.classical_only:
         only_experiments = CLASSICAL_EXPERIMENTS
@@ -123,9 +128,11 @@ def main() -> None:
     elif args.neural_only:
         only_experiments = NEURAL_EXPERIMENTS
         print("[INFO] Neural-only mode: skipping classical experiments.")
-    elif only_experiments:
+    elif args.experiments:
+        only_experiments = args.experiments
         print(f"[INFO] Training specific experiments: {only_experiments}")
     else:
+        only_experiments = None
         print("[INFO] Training ALL 16 models...")
 
     limit = None if args.no_limit else args.limit

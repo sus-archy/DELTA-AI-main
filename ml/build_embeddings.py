@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import torch
+import numpy as np
 from pathlib import Path
 
 
@@ -10,9 +12,7 @@ def build_embeddings(
     encoders: list[str] | None = None,
     max_rows: int | None = None,
 ) -> dict:
-    import numpy as np
     import pandas as pd
-    import torch
     from tqdm.auto import tqdm
 
     from .model_registry import get_encoder_spec, load_encoder_model, load_tokenizer
