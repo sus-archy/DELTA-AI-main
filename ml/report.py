@@ -21,9 +21,13 @@ def build_summary_report(config_path: str | Path | None = None) -> dict:
         for metrics_path in runs_root.glob("*/metrics.json"):
             with metrics_path.open("r", encoding="utf-8") as handle:
                 metrics = json.load(handle)
+            run_dir = metrics_path.parent
+            has_plots = (run_dir / "plots").exists()
             report["runs"].append(
                 {
-                    "run": metrics_path.parent.name,
+                    "run": run_dir.name,
+                    "run_dir": str(run_dir),
+                    "plots_dir": str(run_dir / "plots") if has_plots else None,
                     "macro_f1": metrics.get("macro_f1"),
                     "weighted_f1": metrics.get("weighted_f1"),
                     "balanced_accuracy": metrics.get("balanced_accuracy"),
@@ -39,7 +43,9 @@ def build_summary_report(config_path: str | Path | None = None) -> dict:
     with json_path.open("w", encoding="utf-8") as handle:
         json.dump(report, handle, indent=2)
     if report["runs"]:
-        pd.DataFrame(report["runs"]).to_csv(output_dir / "summary.csv", index=False)
+        df = pd.DataFrame(report["runs"])
+        cols = [c for c in df.columns if c != "run_dir"]
+        df[cols].to_csv(output_dir / "summary.csv", index=False)
     return report
 
 
@@ -120,15 +126,23 @@ def build_benchmark_visual_report(benchmark_root: str | Path) -> dict:
                 "",
                 "## Leaderboard",
                 "",
-                "| Experiment | Seeds | Macro-F1 | Balanced Acc | ECE | Brier |",
-                "|---|---:|---:|---:|---:|---:|",
+                "| Experiment | Seeds | Macro-F1 | Balanced Acc | ECE | Brier | Plots |",
+                "|---|---:|---:|---:|---:|---:|---:|",
             ]
         )
         for _, row in aggregate.iterrows():
+            run_dirs = list(benchmark_root.glob(f"*/{row['experiment']}*"))
+            plot_links = []
+            for d in run_dirs:
+                plots_dir = d / "plots"
+                if plots_dir.exists():
+                    rel = plots_dir.relative_to(benchmark_root.parent)
+                    plot_links.append(f"[{d.name}]({rel})")
+            plots_cell = "; ".join(plot_links) if plot_links else ""
             lines.append(
                 f"| {row['experiment']} | {int(row['num_seeds'])} | "
                 f"{row['macro_f1_mean']:.4f} | {row['balanced_accuracy_mean']:.4f} | "
-                f"{row['ece_mean']:.4f} | {row['brier_mean']:.4f} |"
+                f"{row['ece_mean']:.4f} | {row['brier_mean']:.4f} | {plots_cell} |"
             )
     (benchmark_root / "status.md").write_text("\n".join(lines), encoding="utf-8")
 

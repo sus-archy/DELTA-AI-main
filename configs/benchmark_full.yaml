@@ -11,7 +11,7 @@ paths:
 splits:
   mode: group_stratified
   train_frac: 0.7
-  validation_frac: 0.2
+  validation_frac: 0.15
 runtime:
   seed: 42
   default_batch_size: 16

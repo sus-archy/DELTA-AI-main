@@ -25,6 +25,13 @@ from .metrics import summarize_classification, write_metrics
 from .model_registry import get_encoder_spec, load_sequence_classifier, load_tokenizer
 from .seed import set_global_seed
 
+try:
+    from .viz import generate_all_plots, save_training_history, load_training_history
+except ImportError:
+    generate_all_plots = None
+    save_training_history = None
+    load_training_history = None
+
 LABEL_NAMES = SEVERITY_ORDER
 
 
@@ -257,7 +264,7 @@ def fine_tune(
         loss_name=loss_name,
         focal_gamma=focal_gamma,
     )
-    trainer.train()
+    train_result = trainer.train()
     validation_predictions = trainer.predict(validation_dataset)
     predictions = trainer.predict(test_dataset)
     validation_logits = validation_predictions.predictions
@@ -321,6 +328,40 @@ def fine_tune(
     )
     write_metrics(run_dir / "metrics.json", metrics)
     trainer.save_model(str(run_dir / "best_model"))
+
+    if generate_all_plots is not None:
+        try:
+            log_history = trainer.state.log_history
+            history = []
+            eval_keys = {"eval_macro_f1", "eval_loss", "eval_balanced_accuracy", "eval_ece", "eval_brier"}
+            train_keys = {"loss"}
+            for entry in log_history:
+                row = {}
+                if "epoch" in entry:
+                    row["epoch"] = int(entry["epoch"]) if float(entry["epoch"]).is_integer() else float(entry["epoch"])
+                elif "step" in entry:
+                    row["step"] = entry["step"]
+                for k in train_keys:
+                    if k in entry:
+                        row[f"train_{k}"] = entry[k]
+                for k in eval_keys:
+                    if k in entry:
+                        row[f"validation_{k.split('eval_', 1)[1] if k.startswith('eval_') else k}"] = entry[k]
+                if row:
+                    history.append(row)
+            save_training_history(run_dir, history)
+            generate_all_plots(
+                run_dir,
+                test_frame["severity_id"].to_numpy(),
+                pred,
+                proba,
+                metrics,
+                training_history=history,
+            )
+        except Exception:
+            import traceback
+            traceback.print_exc()
+
     return {"run_dir": str(run_dir), "metrics": metrics}
 
 

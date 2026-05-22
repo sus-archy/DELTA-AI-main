@@ -13,6 +13,7 @@ delta_ml.egg-info/
 
 Data/*
 !Data/README.md
+.Understand-anything/
 
 *.parquet
 *.npz.tmp

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 from urllib.parse import urlparse
 
 import numpy as np
@@ -64,8 +64,46 @@ def build_indicator_key(ioc_type: str, value: str) -> str:
     return f"{str(ioc_type).lower()}||{canonicalize_value(str(ioc_type), value)}"
 
 
+REQUIRED_COLUMNS = {"type", "value", "severity", "source", "description", "tags", "firstSeen", "lastSeen", "observedCount", "raw"}
+
+
+def load_data_frame(data_path: str | Path, limit: int | None = None) -> pd.DataFrame:
+    """Load IOC data from CSV, TXT (TSV), or JSON (array or JSONL) format.
+
+    Auto-detects format by file extension:
+      - .csv  → pd.read_csv
+      - .txt  → pd.read_csv with tab/auto separator detection
+      - .json → tries JSON array first, falls back to JSONL (line-delimited)
+    """
+    data_path = Path(data_path)
+    ext = data_path.suffix.lower()
+
+    if ext == ".json":
+        raw = data_path.read_text(encoding="utf-8").strip()
+        if raw.startswith("["):
+            records = json.loads(raw)
+        else:
+            records = [json.loads(line) for line in raw.splitlines() if line.strip()]
+        if limit is not None:
+            records = records[:limit]
+        frame = pd.DataFrame(records)
+    elif ext == ".txt":
+        frame = pd.read_csv(data_path, sep=None, engine="python", nrows=limit)
+    else:
+        frame = pd.read_csv(data_path, nrows=limit)
+
+    present = set(frame.columns)
+    missing = REQUIRED_COLUMNS - present
+    if missing:
+        raise ValueError(
+            f"Data file '{data_path}' is missing required columns: {', '.join(sorted(missing))}. "
+            f"Got columns: {', '.join(sorted(present))}"
+        )
+    return frame
+
+
 def load_db_frame(csv_path: str | Path, limit: int | None = None) -> pd.DataFrame:
-    frame = pd.read_csv(csv_path, nrows=limit)
+    frame = load_data_frame(csv_path, limit=limit)
     frame["tags_list"] = frame["tags"].map(parse_tags)
     frame["raw_obj"] = frame["raw"].map(parse_raw)
     frame["indicator_key"] = [

@@ -37,6 +37,11 @@ from .metrics import summarize_classification, write_metrics
 from .seed import set_global_seed
 from .settings import bootstrap_environment
 
+try:
+    from .viz import generate_all_plots
+except ImportError:
+    generate_all_plots = None  # type: ignore[assignment]
+
 LABEL_NAMES = SEVERITY_ORDER
 
 
@@ -325,6 +330,21 @@ def train_logreg_tfidf(
             logits=validation_logits,
         )
     write_metrics(run_dir / "metrics.json", metrics)
+
+    if generate_all_plots is not None:
+        try:
+            generate_all_plots(
+                run_dir,
+                test["severity_id"].to_numpy(),
+                test_pred,
+                test_proba,
+                metrics,
+                model=pipeline,
+            )
+        except Exception:
+            import traceback
+            traceback.print_exc()
+
     return metrics, str(run_dir)
 
 
@@ -360,7 +380,9 @@ def train_xgboost_hybrid(
         tree_method="hist",
         random_state=seed,
     )
-    model.fit(x_train, y_train_dense, sample_weight=sample_weight)
+    model.fit(x_train, y_train_dense, sample_weight=sample_weight,
+              eval_set=[(x_train, y_train_dense), (x_test, y_test)],
+              verbose=False)
     proba = model.predict_proba(x_test)
     pred_dense = model.predict(x_test).astype(np.int64)
     pred = index_to_label[pred_dense]
@@ -377,6 +399,34 @@ def train_xgboost_hybrid(
     run_dir = _resolve_run_dir(paths.artifacts_dir / "runs", f"xgboost_hybrid_{encoder_name}_{class_balance}", run_name)
     model.save_model(run_dir / "model.json")
     write_metrics(run_dir / "metrics.json", metrics)
+
+    if generate_all_plots is not None:
+        try:
+            from .viz import load_training_history, save_training_history
+            history = []
+            eval_results = model.evals_result()
+            n_rounds = len(eval_results.get("validation_0", {}).get("mlogloss", []))
+            for i in range(n_rounds):
+                entry = {"epoch": i}
+                for split_key, split_name in [("validation_0", "train"), ("validation_1", "test")]:
+                    if split_key in eval_results:
+                        for metric_key in eval_results[split_key]:
+                            if i < len(eval_results[split_key][metric_key]):
+                                entry[f"{split_name}_{metric_key}"] = float(eval_results[split_key][metric_key][i])
+                history.append(entry)
+            save_training_history(run_dir, history)
+            generate_all_plots(
+                run_dir,
+                y_test,
+                pred,
+                proba,
+                metrics,
+                model=model,
+            )
+        except Exception:
+            import traceback
+            traceback.print_exc()
+
     return metrics, str(run_dir)
 
 

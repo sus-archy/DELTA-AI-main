@@ -13,6 +13,8 @@ dependencies = [
     "rich>=14.3",
     "joblib>=1.5",
     "tqdm>=4.67",
+    "scipy>=1.14",
+    "matplotlib>=3.10",
 ]
 
 [project.optional-dependencies]

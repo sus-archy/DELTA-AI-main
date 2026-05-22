@@ -9,9 +9,9 @@ paths:
   reports_dir: reports
   cache_root: .cache
 splits:
-  mode: temporal
-  test_days: 90
-  validation_days: 60
+  mode: group_stratified
+  train_frac: 0.7
+  validation_frac: 0.15
 runtime:
   seed: 42
   default_batch_size: 16
