@@ -221,7 +221,7 @@ def build_dataset(config_path: str | Path | None = None, limit: int | None = Non
     split_mode = str(splits_cfg.get("mode", "temporal")).lower()
     seed = int(config.get("runtime", {}).get("seed", 42))
 
-    if limit is not None:
+    if limit is not None and limit > 0:
         frame = sample_frame_for_benchmark(frame, limit, seed=seed)
 
     if split_mode in {"group_stratified", "ratio", "stratified"}:
