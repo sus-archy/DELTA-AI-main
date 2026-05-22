@@ -182,6 +182,7 @@ def plot_class_distribution(
     ax.set_xlabel("Severity")
     ax.set_ylabel("Count")
     ax.set_title(title)
+    ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels)
     fig.tight_layout()
     if save_path:
@@ -289,7 +290,7 @@ def plot_threshold_distribution(
         ax.set_xlabel("Predicted Probability")
         ax.set_ylabel("Count")
         ax.set_title(f"{label_name}\nConfidence Distribution")
-        ax.yaxis.set_major_formatter(PercentFormatter(ymax=len(y_proba)))
+        ax.yaxis.set_major_formatter(PercentFormatter(xmax=len(y_proba)))
     fig.tight_layout()
     if save_path:
         fig.savefig(save_path, dpi=160, bbox_inches="tight")
