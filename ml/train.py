@@ -362,6 +362,7 @@ def train_xgboost_hybrid(
     label_to_index = {label: index for index, label in enumerate(present_labels)}
     index_to_label = np.asarray(present_labels, dtype=np.int64)
     y_train_dense = np.asarray([label_to_index[label] for label in y_train], dtype=np.int64)
+    y_test_mapped = np.asarray([label_to_index.get(label, -1) for label in y_test], dtype=np.int64)
     sample_weight = None
     if class_balance != "none":
         sample_weight = build_sample_weights(
@@ -381,7 +382,7 @@ def train_xgboost_hybrid(
         random_state=seed,
     )
     model.fit(x_train, y_train_dense, sample_weight=sample_weight,
-              eval_set=[(x_train, y_train_dense), (x_test, y_test)],
+              eval_set=[(x_train, y_train_dense), (x_test, y_test_mapped)],
               verbose=False)
     proba = model.predict_proba(x_test)
     pred_dense = model.predict(x_test).astype(np.int64)
